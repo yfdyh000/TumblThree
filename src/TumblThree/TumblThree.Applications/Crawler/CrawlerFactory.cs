@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Xml.Linq;
 
@@ -27,16 +28,20 @@ namespace TumblThree.Applications.Crawler
         private readonly IManagerService managerService;
         private readonly IShellService shellService;
         private readonly ISharedCookieService cookieService;
+        private readonly HttpClientHandler httpHandler;
+        private readonly HttpClient httpClient;
         private readonly AppSettings settings;
 
         [ImportingConstructor]
         internal CrawlerFactory(ICrawlerService crawlerService, IManagerService managerService, ShellService shellService,
-            ISharedCookieService cookieService)
+            ISharedCookieService cookieService, HttpClientHandler httpHandler, HttpClient httpClient) // from where?
         {
             this.crawlerService = crawlerService;
             this.managerService = managerService;
             this.shellService = shellService;
-            this.cookieService = cookieService;
+            this.cookieService = cookieService; //
+            this.httpHandler = httpHandler;
+            this.httpClient = httpClient;
             settings = shellService.Settings;
         }
 
@@ -60,7 +65,7 @@ namespace TumblThree.Applications.Crawler
         {
             IPostQueue<TumblrPost> postQueue = GetProducerConsumerCollection();
             IFiles files = LoadFiles(blog);
-            IWebRequestFactory webRequestFactory = GetWebRequestFactory();
+            IHttpRequestFactory webRequestFactory = GetWebRequestFactory(); //
             IImgurParser imgurParser = GetImgurParser(webRequestFactory, ct);
             IGfycatParser gfycatParser = GetGfycatParser(webRequestFactory, ct);
             switch (blog.BlogType)
@@ -111,9 +116,9 @@ namespace TumblThree.Applications.Crawler
             return new Files().Load(blog.ChildId);
         }
 
-        private IWebRequestFactory GetWebRequestFactory()
+        private IHttpRequestFactory GetWebRequestFactory() // base
         {
-            return new WebRequestFactory(shellService, cookieService, settings);
+            return new HttpRequestFactory(shellService, cookieService, settings, httpHandler, httpClient);
         }
 
         private ITumblrParser GetTumblrParser()
@@ -121,12 +126,12 @@ namespace TumblThree.Applications.Crawler
             return new TumblrParser();
         }
 
-        private IImgurParser GetImgurParser(IWebRequestFactory webRequestFactory, CancellationToken ct)
+        private IImgurParser GetImgurParser(IHttpRequestFactory webRequestFactory, CancellationToken ct)
         {
             return new ImgurParser(settings, webRequestFactory, ct);
         }
 
-        private IGfycatParser GetGfycatParser(IWebRequestFactory webRequestFactory, CancellationToken ct)
+        private IGfycatParser GetGfycatParser(IHttpRequestFactory webRequestFactory, CancellationToken ct)
         {
             return new GfycatParser(settings, webRequestFactory, ct);
         }
@@ -163,7 +168,7 @@ namespace TumblThree.Applications.Crawler
 
         private FileDownloader GetFileDownloader(CancellationToken ct)
         {
-            return new FileDownloader(settings, ct, GetWebRequestFactory(), cookieService);
+            return new FileDownloader(settings, ct, GetWebRequestFactory(), cookieService); // independent httpCl
         }
 
         private static IBlogService GetBlogService(IBlog blog, IFiles files)

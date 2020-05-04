@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.IO;
 using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Waf.Applications;
 using System.Windows.Threading;
@@ -24,6 +25,8 @@ namespace TumblThree.Applications.Controllers
         private const string QueueSettingsFileName = "Queuelist.json";
         private const string CookiesFileName = "Cookies.json";
 
+        private readonly HttpClientHandler _httpClientHandler;
+        private readonly HttpClient _httpClient;
         private readonly ISharedCookieService _cookieService;
         private readonly IEnvironmentService _environmentService;
         private readonly Lazy<ShellService> _shellService;
@@ -51,6 +54,8 @@ namespace TumblThree.Applications.Controllers
             IConfirmTumblrPrivacyConsent confirmTumblrPrivacyConsent,
             ISettingsProvider settingsProvider,
             ISharedCookieService cookieService,
+            HttpClientHandler httpClientHandler, 
+            HttpClient httpClient,
             Lazy<ManagerController> managerController,
             Lazy<QueueController> queueController,
             Lazy<DetailsController> detailsController,
@@ -62,6 +67,8 @@ namespace TumblThree.Applications.Controllers
             _confirmTumblrPrivacyConsent = confirmTumblrPrivacyConsent;
             _settingsProvider = settingsProvider;
             _cookieService = cookieService;
+            _httpClientHandler = httpClientHandler;
+            _httpClient = httpClient;
             _detailsController = detailsController;
             _managerController = managerController;
             _queueController = queueController;
@@ -82,7 +89,7 @@ namespace TumblThree.Applications.Controllers
 
         private ShellViewModel ShellViewModel => _shellViewModel.Value;
 
-        public void Initialize()
+        public void Initialize() // 
         {
             string savePath = _environmentService.AppSettingsPath;
             if (CheckIfPortableMode(AppSettingsFileName))
@@ -93,7 +100,7 @@ namespace TumblThree.Applications.Controllers
             _appSettings = LoadSettings<AppSettings>(Path.Combine(savePath, AppSettingsFileName));
             _queueSettings = LoadSettings<QueueSettings>(Path.Combine(savePath, QueueSettingsFileName));
             _managerSettings = LoadSettings<ManagerSettings>(Path.Combine(savePath, ManagerSettingsFileName));
-            _cookieList = LoadSettings<List<Cookie>>(Path.Combine(savePath, CookiesFileName));
+            _cookieList = LoadSettings<List<Cookie>>(Path.Combine(savePath, CookiesFileName)); // load
 
             ShellService.Settings = _appSettings;
             ShellService.ShowErrorAction = ShellViewModel.ShowError;
@@ -115,7 +122,6 @@ namespace TumblThree.Applications.Controllers
             QueueController.Initialize();
             DetailsController.Initialize();
             CrawlerController.Initialize();
-            _cookieService.SetUriCookie(_cookieList);
         }
 
         public async void Run()
@@ -150,7 +156,7 @@ namespace TumblThree.Applications.Controllers
             SaveSettings(Path.Combine(savePath, AppSettingsFileName), _appSettings);
             SaveSettings(Path.Combine(savePath, QueueSettingsFileName), _queueSettings);
             SaveSettings(Path.Combine(savePath, ManagerSettingsFileName), _managerSettings);
-            SaveSettings(Path.Combine(savePath, CookiesFileName), new List<Cookie>(_cookieService.GetAllCookies()));
+            SaveSettings(Path.Combine(savePath, CookiesFileName), new List<Cookie>(_cookieService.GetAllCookies(_httpClientHandler.CookieContainer))); // ok???
         }
 
         private void OnSettingsUpdated(object sender, EventArgs e)
