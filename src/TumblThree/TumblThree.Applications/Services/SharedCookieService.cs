@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Composition;
 using System.Net;
+using System.Net.Http;
 using System.Reflection;
 
 namespace TumblThree.Applications.Services
@@ -11,9 +12,7 @@ namespace TumblThree.Applications.Services
     [Export]
     public class SharedCookieService : ISharedCookieService
     {
-        private readonly CookieContainer cookieContainer = new CookieContainer();
-
-        public void GetUriCookie(CookieContainer request, Uri uri)
+        public void GetUriCookie(CookieContainer cookieContainer, CookieContainer request, Uri uri)
         {
             foreach (Cookie cookie in cookieContainer.GetCookies(uri))
             {
@@ -21,7 +20,7 @@ namespace TumblThree.Applications.Services
             }
         }
 
-        public void SetUriCookie(IEnumerable cookies)
+        public void SetUriCookie(CookieContainer cookieContainer, IEnumerable cookies)
         {
             foreach (Cookie cookie in cookies)
             {
@@ -29,16 +28,15 @@ namespace TumblThree.Applications.Services
             }
         }
 
-        public void RemoveUriCookie(Uri uri)
+        public void RemoveUriCookie(CookieContainer cookieContainer, Uri uri)
         {
-            CookieCollection cookies = cookieContainer.GetCookies(uri);
-            foreach (Cookie cookie in cookies)
+            foreach (Cookie cookie in cookieContainer.GetCookies(uri))
             {
                 cookie.Expired = true;
             }
         }
 
-        public IEnumerable<Cookie> GetAllCookies()
+        public IEnumerable<Cookie> GetAllCookies(CookieContainer cookieContainer)
         {
             var k = (Hashtable)cookieContainer
                                      .GetType().GetField("m_domainTable", BindingFlags.Instance | BindingFlags.NonPublic)
