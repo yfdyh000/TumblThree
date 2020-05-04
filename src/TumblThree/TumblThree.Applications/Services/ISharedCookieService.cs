@@ -14,5 +14,8 @@ namespace TumblThree.Applications.Services
         void SetUriCookie(IEnumerable cookies);
 
         void RemoveUriCookie(Uri uri);
+
+        CookieContainer GetCookies();
+        void SetCookies(CookieContainer cookieContainer);
     }
 }

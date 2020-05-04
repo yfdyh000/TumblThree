@@ -32,7 +32,7 @@ namespace TumblThree.Applications.Crawler
 
         private int numberOfPagesCrawled;
 
-        public TumblrSearchCrawler(IShellService shellService, ICrawlerService crawlerService, IWebRequestFactory webRequestFactory,
+        public TumblrSearchCrawler(IShellService shellService, ICrawlerService crawlerService, IHttpRequestFactory webRequestFactory,
             ISharedCookieService cookieService, IDownloader downloader, ITumblrParser tumblrParser, IImgurParser imgurParser,
             IGfycatParser gfycatParser, IWebmshareParser webmshareParser, IMixtapeParser mixtapeParser, IUguuParser uguuParser,
             ISafeMoeParser safemoeParser, ILoliSafeParser lolisafeParser, ICatBoxParser catboxParser,
@@ -133,7 +133,7 @@ namespace TumblThree.Applications.Crawler
                 string url = "https://www.tumblr.com/search/" + Blog.Name + "/post_page/" + pageNumber;
                 string referer = @"https://www.tumblr.com/search/" + Blog.Name;
                 var headers = new Dictionary<string, string> { { "X-tumblr-form-key", tumblrKey }, { "DNT", "1" } };
-                HttpWebRequest request = WebRequestFactory.CreatePostXhrReqeust(url, referer, headers);
+                HttpRequestMessage request = WebRequestFactory.CreatePostXhrReqeust(url, referer, headers);
                 CookieService.GetUriCookie(request.CookieContainer, new Uri("https://www.tumblr.com/"));
 
                 //Example request body, searching for cars:

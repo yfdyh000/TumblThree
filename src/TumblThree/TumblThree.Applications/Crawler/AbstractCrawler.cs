@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
 using System.Text;
@@ -39,7 +40,7 @@ namespace TumblThree.Applications.Crawler
         protected ConcurrentBag<TumblrPost> StatisticsBag { get; set; } = new ConcurrentBag<TumblrPost>();
         protected List<string> Tags { get; set; } = new List<string>();
 
-        protected AbstractCrawler(IShellService shellService, ICrawlerService crawlerService, IProgress<DownloadProgress> progress, IWebRequestFactory webRequestFactory,
+        protected AbstractCrawler(IShellService shellService, ICrawlerService crawlerService, IProgress<DownloadProgress> progress, IHttpRequestFactory webRequestFactory,
             ISharedCookieService cookieService, IPostQueue<TumblrPost> postQueue, IBlog blog,
             PauseToken pt, CancellationToken ct)
         {
@@ -109,7 +110,7 @@ namespace TumblThree.Applications.Crawler
             var requestRegistration = new CancellationTokenRegistration();
             try
             {
-                HttpWebRequest request = WebRequestFactory.CreateGetReqeust(url, string.Empty, headers);
+                var request = WebRequestFactory.CreateGetReqeust(url, string.Empty, headers);
                 cookieHosts = cookieHosts ?? new List<string>();
                 foreach (string cookieHost in cookieHosts)
                 {

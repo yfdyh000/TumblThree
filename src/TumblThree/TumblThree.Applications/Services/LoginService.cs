@@ -16,13 +16,13 @@ namespace TumblThree.Applications.Services
     {
         private readonly IShellService shellService;
         private readonly ISharedCookieService cookieService;
-        private readonly IWebRequestFactory webRequestFactory;
+        private readonly IHttpRequestFactory webRequestFactory;
         private string tumblrKey = string.Empty;
         private bool tfaNeeded = false;
         private string tumblrTFAKey = string.Empty;
 
         [ImportingConstructor]
-        public LoginService(IShellService shellService, IWebRequestFactory webRequestFactory, ISharedCookieService cookieService)
+        public LoginService(IShellService shellService, IHttpRequestFactory webRequestFactory, ISharedCookieService cookieService)
         {
             this.shellService = shellService;
             this.webRequestFactory = webRequestFactory;

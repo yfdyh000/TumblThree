@@ -15,13 +15,13 @@ namespace TumblThree.Applications.Services
     [Export]
     internal class ConfirmTumblrPrivacyConsent : IConfirmTumblrPrivacyConsent
     {
-        private readonly IWebRequestFactory webRequestFactory;
+        private readonly IHttpRequestFactory webRequestFactory;
         private readonly IShellService shellService;
         protected readonly ISharedCookieService cookieService;
         private string tumblrKey = string.Empty;
 
         [ImportingConstructor]
-        public ConfirmTumblrPrivacyConsent(IShellService shellService, ISharedCookieService cookieService, IWebRequestFactory webRequestFactory)
+        public ConfirmTumblrPrivacyConsent(IShellService shellService, ISharedCookieService cookieService, IHttpRequestFactory webRequestFactory)
         {
             this.webRequestFactory = webRequestFactory;
             this.cookieService = cookieService;
@@ -56,7 +56,7 @@ namespace TumblThree.Applications.Services
             await UpdateTumblrKey();
             const string referer = @"https://www.tumblr.com/privacy/consent?redirect=";
             var headers = new Dictionary<string, string> { { "X-tumblr-form-key", tumblrKey } };
-            HttpWebRequest request =
+            HttpRequestMessage request =
                 webRequestFactory.CreatePostXhrReqeust("https://www.tumblr.com/svc/privacy/consent", referer, headers);
             const string requestBody = "{\"eu_resident\":true,\"gdpr_is_acceptable_age\":true,\"gdpr_consent_core\":true,\"gdpr_consent_first_party_ads\":true,\"gdpr_consent_third_party_ads\":true,\"gdpr_consent_search_history\":true,\"redirect_to\":\"\"}";
             request.ContentType = "application/json";
@@ -78,13 +78,13 @@ namespace TumblThree.Applications.Services
         private async Task<string> GetRequestAsync()
         {
             const string requestUrl = "https://www.tumblr.com/";
-            HttpWebRequest request = webRequestFactory.CreateGetReqeust(requestUrl);
+            HttpRequestMessage request = webRequestFactory.CreateGetReqeust(requestUrl);
             return await webRequestFactory.ReadReqestToEndAsync(request);
         }
 
         public bool CheckIfLoggedInAsync()
         {
-            HttpWebRequest request = webRequestFactory.CreateGetReqeust("https://www.tumblr.com/");
+            HttpRequestMessage request = webRequestFactory.CreateGetReqeust("https://www.tumblr.com/");
             cookieService.GetUriCookie(request.CookieContainer, new Uri("https://www.tumblr.com/"));
             return request.CookieContainer.GetCookieHeader(new Uri("https://www.tumblr.com/")).Contains("pfs");
         }

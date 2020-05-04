@@ -14,10 +14,10 @@ namespace TumblThree.Applications.Downloader
         public static readonly int BufferSize = 512 * 4096;
         private readonly AppSettings settings;
         private readonly CancellationToken ct;
-        private readonly IWebRequestFactory webRequestFactory;
+        private readonly IHttpRequestFactory webRequestFactory;
         private readonly ISharedCookieService cookieService;
 
-        public FileDownloader(AppSettings settings, CancellationToken ct, IWebRequestFactory webRequestFactory, ISharedCookieService cookieService)
+        public FileDownloader(AppSettings settings, CancellationToken ct, IHttpRequestFactory webRequestFactory, ISharedCookieService cookieService)
         {
             this.settings = settings;
             this.ct = ct;

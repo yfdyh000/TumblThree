@@ -93,7 +93,7 @@
     <Compile Include="Parser\IUguuParser.cs" />
     <Compile Include="Parser\IWebmshareParser.cs" />
     <Compile Include="Services\ILoginService.cs" />
-    <Compile Include="Services\IWebRequestFactory.cs" />
+    <Compile Include="Services\IHttpRequestFactory.cs" />
     <Compile Include="Crawler\TumblrBlogDetector.cs" />
     <Compile Include="Parser\LoliSafeParser.cs" />
     <Compile Include="Parser\MixtapeParser.cs" />

@@ -13,10 +13,10 @@ namespace TumblThree.Applications.Parser
     public class ImgurParser : IImgurParser
     {
         private readonly AppSettings settings;
-        private readonly IWebRequestFactory webRequestFactory;
+        private readonly IHttpRequestFactory webRequestFactory;
         private readonly CancellationToken ct;
 
-        public ImgurParser(AppSettings settings, IWebRequestFactory webRequestFactory, CancellationToken ct)
+        public ImgurParser(AppSettings settings, IHttpRequestFactory webRequestFactory, CancellationToken ct)
         {
             this.settings = settings;
             this.webRequestFactory = webRequestFactory;
@@ -35,17 +35,9 @@ namespace TumblThree.Applications.Parser
 
         public virtual async Task<string> RequestImgurAlbumSite(string imgurAlbumUrl)
         {
-            var requestRegistration = new CancellationTokenRegistration();
-            try
-            {
-                HttpWebRequest request = webRequestFactory.CreateGetReqeust(imgurAlbumUrl);
-                requestRegistration = ct.Register(() => request.Abort());
-                return await webRequestFactory.ReadReqestToEndAsync(request);
-            }
-            finally
-            {
-                requestRegistration.Dispose();
-            }
+            var request = webRequestFactory.CreateGetReqeust(imgurAlbumUrl);
+            var res = await webRequestFactory.CreateHttpClient().SendAsync(request);
+            return await res.Content.ReadAsStringAsync();
         }
 
         public IEnumerable<string> SearchForImgurUrl(string searchableText)

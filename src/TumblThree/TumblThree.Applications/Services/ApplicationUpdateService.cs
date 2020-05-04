@@ -16,12 +16,12 @@ namespace TumblThree.Applications.Services
     public class ApplicationUpdateService : IApplicationUpdateService
     {
         private readonly IShellService shellService;
-        private readonly IWebRequestFactory webRequestFactory;
+        private readonly IHttpRequestFactory webRequestFactory;
         private string downloadLink;
         private string version;
 
         [ImportingConstructor]
-        public ApplicationUpdateService(IShellService shellService, IWebRequestFactory webRequestFactory)
+        public ApplicationUpdateService(IShellService shellService, IHttpRequestFactory webRequestFactory)
         {
             this.shellService = shellService;
             this.webRequestFactory = webRequestFactory;
@@ -33,7 +33,7 @@ namespace TumblThree.Applications.Services
             downloadLink = null;
             try
             {
-                HttpWebRequest request = webRequestFactory.CreateGetReqeust("https://api.github.com/repos/tumblthreeapp/tumblthree/releases/latest");
+                HttpRequestMessage request = webRequestFactory.CreateGetReqeust("https://api.github.com/repos/tumblthreeapp/tumblthree/releases/latest");
                 string result = await webRequestFactory.ReadReqestToEndAsync(request);
                 XmlDictionaryReader jsonReader = JsonReaderWriterFactory.CreateJsonReader(Encoding.UTF8.GetBytes(result), new XmlDictionaryReaderQuotas());
                 XElement root = XElement.Load(jsonReader);

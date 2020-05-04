@@ -11,9 +11,9 @@ namespace TumblThree.Applications.Services
     [Export]
     public class SharedCookieService : ISharedCookieService
     {
-        private readonly CookieContainer cookieContainer = new CookieContainer();
-
-        public void GetUriCookie(CookieContainer request, Uri uri)
+        private CookieContainer cookieContainer = new CookieContainer(); // TODO
+        
+        public void GetUriCookie(CookieContainer request, Uri uri) //
         {
             foreach (Cookie cookie in cookieContainer.GetCookies(uri))
             {
@@ -58,5 +58,16 @@ namespace TumblThree.Applications.Services
                 }
             }
         }
+
+        public CookieContainer GetCookies()
+        {
+            return this.cookieContainer;
+        }
+        public void SetCookies(CookieContainer cookieContainer)
+        {
+            this.cookieContainer = cookieContainer;
+        }
+
+
     }
 }

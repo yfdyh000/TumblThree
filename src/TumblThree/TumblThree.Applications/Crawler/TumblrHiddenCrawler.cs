@@ -5,6 +5,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -40,7 +41,7 @@ namespace TumblThree.Applications.Crawler
 
         private int numberOfPagesCrawled;
 
-        public TumblrHiddenCrawler(IShellService shellService, ICrawlerService crawlerService, IWebRequestFactory webRequestFactory,
+        public TumblrHiddenCrawler(IShellService shellService, ICrawlerService crawlerService, IHttpRequestFactory webRequestFactory,
             ISharedCookieService cookieService, IDownloader downloader, ICrawlerDataDownloader crawlerDataDownloader,
             ITumblrToTextParser<Post> tumblrJsonParser, ITumblrParser tumblrParser, IImgurParser imgurParser,
             IGfycatParser gfycatParser, IWebmshareParser webmshareParser, IMixtapeParser mixtapeParser, IUguuParser uguuParser,
@@ -341,7 +342,7 @@ namespace TumblThree.Applications.Crawler
                              @"&post_id=&limit=" + limit + "&offset=" + offset + "&should_bypass_safemode=true";
                 string referer = @"https://www.tumblr.com/dashboard/blog/" + Blog.Name;
                 var headers = new Dictionary<string, string> { { "X-tumblr-form-key", tumblrKey } };
-                HttpWebRequest request = WebRequestFactory.CreateGetXhrReqeust(url, referer, headers);
+                HttpRequestMessage request = WebRequestFactory.CreateGetXhrReqeust(url, referer, headers);
                 CookieService.GetUriCookie(request.CookieContainer, new Uri("https://www.tumblr.com/"));
                 CookieService.GetUriCookie(request.CookieContainer, new Uri("https://" + Blog.Name.Replace("+", "-") + ".tumblr.com"));
                 requestRegistration = Ct.Register(() => request.Abort());
