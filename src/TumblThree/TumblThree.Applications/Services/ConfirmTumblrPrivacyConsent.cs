@@ -80,6 +80,7 @@ namespace TumblThree.Applications.Services
 
         public bool CheckIfLoggedIn()
         {
+            if (webRequestFactory.TakeHttpHandler.CookieContainer == null) return false;
             return webRequestFactory.TakeHttpHandler.CookieContainer.GetCookieHeader(new Uri("https://www.tumblr.com/")).Contains("pfs");
         }
     }

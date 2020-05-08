@@ -18,7 +18,7 @@ namespace TumblThree.Applications.Services
 
     public class HttpRequestFactory : IHttpRequestFactory
     {
-        public HttpClientHandler HttpHandler { get; set; }
+        public WinHttpHandler HttpHandler { get; set; }
         public HttpClient HttpClient { get; set; }
         private readonly AppSettings settings;
 
@@ -35,9 +35,12 @@ namespace TumblThree.Applications.Services
         }
         public void initHttpHandler()
         {
-            HttpHandler = new HttpClientHandler();
+            HttpHandler = new WinHttpHandler();
             HttpHandler.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate; // def: None;
-            HttpHandler.AllowAutoRedirect = true;
+            HttpHandler.AutomaticRedirection = true;
+            HttpHandler.CookieUsePolicy = CookieUsePolicy.UseInternalCookieStoreOnly; // TODO
+            HttpHandler.WindowsProxyUsePolicy = WindowsProxyUsePolicy.UseCustomProxy;
+            //HttpHandler.WindowsProxyUsePolicy = WindowsProxyUsePolicy.UseWinInetProxy;
 
             IWebProxy proxy = new WebProxy();
             proxy = new WebProxy("127.0.0.1", 10809);
@@ -51,7 +54,7 @@ namespace TumblThree.Applications.Services
             }
             HttpHandler.Proxy = proxy;*/
         }
-        public void initHttpClient(HttpClientHandler handler = null) // due to only once allowed
+        public void initHttpClient(WinHttpHandler handler = null) // due to only once allowed
         {
             HttpClient = new HttpClient(handler ?? HttpHandler);
 
@@ -60,7 +63,7 @@ namespace TumblThree.Applications.Services
             HttpClient.BaseAddress = new Uri("https://www.tumblr.com/");
         }
 
-        public HttpClientHandler TakeHttpHandler
+        public WinHttpHandler TakeHttpHandler
         {
             get
             {
@@ -81,7 +84,7 @@ namespace TumblThree.Applications.Services
             var message = new HttpRequestMessage()
             {
                 RequestUri = new Uri(url)
-                //, Version = new Version("2.0")
+                , Version = new Version("2.0") // see also https://github.com/dotnet/runtime/issues/15877
             };
             if(!string.IsNullOrEmpty(referer))
                 message.Headers.Referrer = new Uri(referer);
@@ -156,7 +159,7 @@ namespace TumblThree.Applications.Services
         public async Task<bool> RemotePageIsValidAsync(string url)
         {
             var httpHandler = TakeHttpHandler;
-            httpHandler.AllowAutoRedirect = false;
+            httpHandler.AutomaticRedirection = false;
             var httpClient = TakeHttpClient;
 
             var request = NewStubRequest(url);
