@@ -35,8 +35,7 @@ namespace TumblThree.Applications.Parser
 
         public virtual async Task<string> RequestImgurAlbumSite(string imgurAlbumUrl)
         {
-            var request = webRequestFactory.CreateGetReqeust(imgurAlbumUrl);
-            var res = await webRequestFactory.CreateHttpClient().SendAsync(request);
+            var res = await webRequestFactory.GetReqeust(imgurAlbumUrl);
             return await res.Content.ReadAsStringAsync();
         }
 

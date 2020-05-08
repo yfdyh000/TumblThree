@@ -44,15 +44,8 @@ namespace TumblThree.Applications.Crawler
 
         private async Task<string> GetUrlRedirection(string url)
         {
-            HttpRequestMessage request = webRequestFactory.CreateGetReqeust(url);
-            cookieService.GetUriCookie(request.CookieContainer, new Uri("https://www.tumblr.com/"));
-            string location;
-            using (var response = await request.GetResponseAsync().TimeoutAfter(shellService.Settings.TimeOut) as HttpWebResponse)
-            {
-                location = response.ResponseUri.ToString();
-            }
-
-            return location;
+            var res = await webRequestFactory.GetReqeust(url);
+            return res.Headers.Location.AbsoluteUri;
         }
     }
 }

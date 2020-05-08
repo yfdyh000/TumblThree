@@ -33,8 +33,8 @@ namespace TumblThree.Applications.Services
             downloadLink = null;
             try
             {
-                HttpRequestMessage request = webRequestFactory.CreateGetReqeust("https://api.github.com/repos/tumblthreeapp/tumblthree/releases/latest");
-                string result = await webRequestFactory.ReadReqestToEndAsync(request);
+                var res = await webRequestFactory.GetReqeust("https://api.github.com/repos/tumblthreeapp/tumblthree/releases/latest");
+                string result = await res.Content.ReadAsStringAsync();
                 XmlDictionaryReader jsonReader = JsonReaderWriterFactory.CreateJsonReader(Encoding.UTF8.GetBytes(result), new XmlDictionaryReaderQuotas());
                 XElement root = XElement.Load(jsonReader);
                 version = root.Element("tag_name").Value;

@@ -8,23 +8,24 @@ namespace TumblThree.Applications.Services
 {
     public interface IHttpRequestFactory
     {
-        HttpClientHandler CreateHttpHandler();
-        HttpClient CreateHttpClient(HttpClientHandler httpHandler = null);
-        HttpRequestMessage CreateGetReqeust(string url, string referer = "", Dictionary<string, string> headers = null);
+        HttpClientHandler TakeHttpHandler();
+        HttpClient TakeHttpClient();
+        Task<HttpRequestMessage> GetReqeustMessage(string url, string referer = "", Dictionary<string, string> headers = null);
+        Task<HttpResponseMessage> GetReqeust(string url, string referer = "", Dictionary<string, string> headers = null);
 
-        HttpRequestMessage CreateGetXhrReqeust(string url, string referer = "", Dictionary<string, string> headers = null);
+        HttpRequestMessage GetXhrReqeustMessage(string url, string referer = "", Dictionary<string, string> headers = null);
 
-        HttpRequestMessage CreatePostReqeust(string url, string referer = "", Dictionary<string, string> headers = null);
+        HttpRequestMessage PostReqeustMessage(string url, string referer = "", Dictionary<string, string> headers = null);
 
-        HttpRequestMessage CreatePostXhrReqeust(string url, string referer = "", Dictionary<string, string> headers = null);
+        HttpRequestMessage PostXhrReqeustMessage(string url, string referer = "", Dictionary<string, string> headers = null);
+        Task<HttpResponseMessage> SendAsync(HttpRequestMessage requestMessage);
 
-        Task PerformPostReqeustAsync(HttpRequestMessage request, Dictionary<string, string> parameters);
+        Task<HttpResponseMessage> PostReqeustAsync(HttpRequestMessage request, Dictionary<string, string> parameters);
 
-        Task PerformPostXHRReqeustAsync(HttpRequestMessage request, string requestBody);
+        Task<HttpResponseMessage> PostXHRReqeustAsync(HttpRequestMessage request, string requestBody);
 
         Task<bool> RemotePageIsValidAsync(string url);
 
-        Task<string> ReadReqestToEndAsync(HttpRequestMessage request);
 
         Stream GetStreamForApiRequest(Stream stream);
 

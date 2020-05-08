@@ -35,18 +35,10 @@ namespace TumblThree.Applications.Parser
 
         public virtual async Task<string> RequestGfycatCajax(string gfyId)
         {
-            var requestRegistration = new CancellationTokenRegistration();
-            try
-            {
                 string url = @"https://gfycat.com/cajax/get/" + gfyId;
-                HttpRequestMessage request = webRequestFactory.CreateGetXhrReqeust(url);
-                requestRegistration = ct.Register(() => request.Abort());
-                return await webRequestFactory.ReadReqestToEndAsync(request);
-            }
-            finally
-            {
-                requestRegistration.Dispose();
-            }
+                var request = webRequestFactory.GetXhrReqeustMessage(url);
+                var res = await webRequestFactory.SendAsync(request);
+                return await res.Content.ReadAsStringAsync();
         }
 
         public string ParseGfycatCajaxResponse(string result, GfycatTypes gfycatType)
