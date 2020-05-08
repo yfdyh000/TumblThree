@@ -28,20 +28,16 @@ namespace TumblThree.Applications.Crawler
         private readonly IManagerService managerService;
         private readonly IShellService shellService;
         private readonly ISharedCookieService cookieService;
-        private readonly HttpClientHandler httpHandler;
-        private readonly HttpClient httpClient;
         private readonly AppSettings settings;
 
         [ImportingConstructor]
         internal CrawlerFactory(ICrawlerService crawlerService, IManagerService managerService, ShellService shellService,
-            ISharedCookieService cookieService, HttpClientHandler httpHandler, HttpClient httpClient) // from where?
+            ISharedCookieService cookieService) // from where?
         {
             this.crawlerService = crawlerService;
             this.managerService = managerService;
             this.shellService = shellService;
-            this.cookieService = cookieService; //
-            this.httpHandler = httpHandler;
-            this.httpClient = httpClient;
+            this.cookieService = cookieService;
             settings = shellService.Settings;
         }
 
@@ -65,7 +61,7 @@ namespace TumblThree.Applications.Crawler
         {
             IPostQueue<TumblrPost> postQueue = GetProducerConsumerCollection();
             IFiles files = LoadFiles(blog);
-            IHttpRequestFactory webRequestFactory = GetWebRequestFactory(); //
+            IHttpRequestFactory webRequestFactory = GetWebRequestFactory();
             IImgurParser imgurParser = GetImgurParser(webRequestFactory, ct);
             IGfycatParser gfycatParser = GetGfycatParser(webRequestFactory, ct);
             switch (blog.BlogType)
@@ -116,9 +112,9 @@ namespace TumblThree.Applications.Crawler
             return new Files().Load(blog.ChildId);
         }
 
-        private IHttpRequestFactory GetWebRequestFactory() // base
+        private IHttpRequestFactory GetWebRequestFactory()
         {
-            return new HttpRequestFactory(shellService, cookieService, settings, httpHandler, httpClient);
+            return new HttpRequestFactory(shellService, cookieService, settings);
         }
 
         private ITumblrParser GetTumblrParser()
@@ -168,7 +164,7 @@ namespace TumblThree.Applications.Crawler
 
         private FileDownloader GetFileDownloader(CancellationToken ct)
         {
-            return new FileDownloader(settings, ct, GetWebRequestFactory(), cookieService); // independent httpCl
+            return new FileDownloader(settings, ct, GetWebRequestFactory(), cookieService);
         }
 
         private static IBlogService GetBlogService(IBlog blog, IFiles files)

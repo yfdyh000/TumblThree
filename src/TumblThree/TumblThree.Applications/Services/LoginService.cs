@@ -34,6 +34,7 @@ namespace TumblThree.Applications.Services
             try
             {
                 var document = await RequestTumblrKey().ConfigureAwait(false);
+                if (document?.Length == 0) throw new TimeoutException();
                 tumblrKey = ExtractTumblrKey(document);
                 await Register(login, password).ConfigureAwait(false);
                 document = await Authenticate(login, password).ConfigureAwait(false);
@@ -42,23 +43,16 @@ namespace TumblThree.Applications.Services
                     tumblrTFAKey = ExtractTumblrTFAKey(document);
                 }
             }
-            catch (TimeoutException)
-            {
-            }
+            catch { }
         }
 
         public void PerformTumblrLogout()
         {
-            var cookieContainer = webRequestFactory.TakeHttpHandler().CookieContainer;
+            var cookieContainer = webRequestFactory.TakeHttpHandler.CookieContainer;
 
             var tosCookie = cookieContainer.GetCookies(new Uri("https://www.tumblr.com/"))["pfg"]; // pfg cookie contains ToS/GDPR agreement
             cookieService.RemoveUriCookie(cookieContainer, new Uri("https://www.tumblr.com"));
-            /*var tosCookieCollection = new CookieCollection
-            {
-                tosCookie
-            };*/
             cookieContainer.Add(tosCookie);
-            //cookieService.SetUriCookie(tosCookieCollection);
         }
 
         public bool CheckIfTumblrTFANeeded() => tfaNeeded;
@@ -78,9 +72,17 @@ namespace TumblThree.Applications.Services
 
         private async Task<string> RequestTumblrKey()
         {
-            const string url = "https://www.tumblr.com/login";
-            var res = await webRequestFactory.GetReqeust(url);
-            return await res.Content.ReadAsStringAsync();
+            try {
+                const string url = "https://www.tumblr.com/login";
+                var res = await webRequestFactory.GetReqeust(url);
+                return await res.Content.ReadAsStringAsync();
+            }
+            catch (Exception ex)
+            {
+                //if (ex is System.Net.Http.HttpRequestException ||
+                //    ex is TimeoutException)
+                return "";
+            }
         }
 
         private async Task Register(string login, string password)
@@ -188,9 +190,9 @@ namespace TumblThree.Applications.Services
             await webRequestFactory.PostReqeustAsync(request, parameters);
         }
 
-        public bool CheckIfLoggedInAsync()
+        public bool CheckIfLoggedIn()
         {
-            return webRequestFactory.TakeHttpHandler().CookieContainer.GetCookieHeader(new Uri("https://www.tumblr.com/")).Contains("pfs");
+            return webRequestFactory.TakeHttpHandler.CookieContainer.GetCookieHeader(new Uri("https://www.tumblr.com/")).Contains("pfs");
         }
 
         public async Task<string> GetTumblrUsernameAsync()

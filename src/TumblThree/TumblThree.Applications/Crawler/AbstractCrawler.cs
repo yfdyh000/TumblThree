@@ -27,8 +27,6 @@ namespace TumblThree.Applications.Crawler
         protected IBlog Blog { get; }
         protected IProgress<DownloadProgress> Progress { get; }
         protected ISharedCookieService CookieService { get; }
-        protected HttpClientHandler httpHandler;
-        protected HttpClient httpClient;
 
         protected IHttpRequestFactory HttpRequestFactory { get; }
         protected object LockObjectDb { get; } = new object();
@@ -50,6 +48,8 @@ namespace TumblThree.Applications.Crawler
             ShellService = shellService;
             CrawlerService = crawlerService;
 
+            //_httpClientHandler = httpClientHandler;
+            //_httpClient = httpClient;
             HttpRequestFactory = webRequestFactory;
             CookieService = cookieService;
             PostQueue = postQueue;

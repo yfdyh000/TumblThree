@@ -8,8 +8,11 @@ namespace TumblThree.Applications.Services
 {
     public interface IHttpRequestFactory
     {
-        HttpClientHandler TakeHttpHandler();
-        HttpClient TakeHttpClient();
+        WinHttpHandler TakeHttpHandler { get; }
+        HttpClient TakeHttpClient { get; }
+        void initHttpHandler();
+        void initHttpClient(WinHttpHandler HttpHandler);
+
         Task<HttpRequestMessage> GetReqeustMessage(string url, string referer = "", Dictionary<string, string> headers = null);
         Task<HttpResponseMessage> GetReqeust(string url, string referer = "", Dictionary<string, string> headers = null);
 
