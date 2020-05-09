@@ -111,6 +111,12 @@ namespace TumblThree.Applications.Crawler
             IEnumerable<string> cookieHosts = null)
         {
             var res = await HttpRequestFactory.GetReqeust(url, string.Empty, headers);
+            /*cookieHosts = cookieHosts ?? new List<string>();
+            foreach (string cookieHost in cookieHosts)
+            {
+                CookieService.FillUriCookie(new Uri(cookieHost));
+            }*/
+
             return await res.Content.ReadAsStringAsync();
         }
 

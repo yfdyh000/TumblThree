@@ -2,18 +2,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Net;
-using System.Net.Http;
 
 namespace TumblThree.Applications.Services
 {
     public interface ISharedCookieService
     {
+        CookieContainer CookieContainer { get; }
         IEnumerable<Cookie> GetAllCookies(CookieContainer cookieContainer);
 
-        void GetUriCookie(CookieContainer cookieContainer, CookieContainer request, Uri uri);
+        void FillUriCookie(Uri uri, CookieContainer container = null);
 
-        void SetUriCookie(CookieContainer cookieContainer, IEnumerable cookies);
+        void RefreshAllCookies(CookieContainer cookies);
+        void SetUriCookie(IEnumerable cookies);
 
-        void RemoveUriCookie(CookieContainer cookieContainer, Uri uri);
+        void RemoveUriCookie(Uri uri);
     }
 }

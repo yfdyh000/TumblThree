@@ -20,13 +20,16 @@ namespace TumblThree.Applications.Services
     {
         public WinHttpHandler HttpHandler { get; set; }
         public HttpClient HttpClient { get; set; }
+
+        private ISharedCookieService cookieService;
+        //private CookieContainer cookieContainer = new CookieContainer();
         private readonly AppSettings settings;
 
         [ImportingConstructor]
         public HttpRequestFactory(IShellService shellService, ISharedCookieService cookieService, AppSettings settings)
         {
             //this.shellService = shellService;
-            //this.cookieService = cookieService;
+            this.cookieService = cookieService;
             this.settings = settings;
             ServicePointManager.DefaultConnectionLimit = 400;
 
@@ -38,21 +41,28 @@ namespace TumblThree.Applications.Services
             HttpHandler = new WinHttpHandler();
             HttpHandler.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate; // def: None;
             HttpHandler.AutomaticRedirection = true;
-            HttpHandler.CookieUsePolicy = CookieUsePolicy.UseInternalCookieStoreOnly; // TODO
-            HttpHandler.WindowsProxyUsePolicy = WindowsProxyUsePolicy.UseCustomProxy;
-            //HttpHandler.WindowsProxyUsePolicy = WindowsProxyUsePolicy.UseWinInetProxy;
+            //HttpHandler.CookieUsePolicy = CookieUsePolicy.UseInternalCookieStoreOnly;
+            HttpHandler.CookieUsePolicy = CookieUsePolicy.UseSpecifiedCookieContainer;
+            HttpHandler.CookieContainer = cookieService.CookieContainer;
+            ServicePointManager.ServerCertificateValidationCallback += (sender, certificate, chain, sslPolicyErrors) => true;
 
-            IWebProxy proxy = new WebProxy();
-            proxy = new WebProxy("127.0.0.1", 10809);
-            HttpHandler.Proxy = proxy;
-
-/*            if (!string.IsNullOrEmpty(settings.ProxyHost) && !string.IsNullOrEmpty(settings.ProxyPort))
+            if (!string.IsNullOrEmpty(settings.ProxyHost) && !string.IsNullOrEmpty(settings.ProxyPort)) // TODO: new options
             {
-                proxy = new WebProxy(settings.ProxyHost, int.Parse(settings.ProxyPort));
+                IWebProxy proxy = new WebProxy(settings.ProxyHost, int.Parse(settings.ProxyPort));
                 if (!string.IsNullOrEmpty(settings.ProxyUsername) && !string.IsNullOrEmpty(settings.ProxyPassword))
                     proxy.Credentials = new NetworkCredential(settings.ProxyUsername, settings.ProxyPassword);
+                HttpHandler.Proxy = proxy;
+                HttpHandler.WindowsProxyUsePolicy = WindowsProxyUsePolicy.UseCustomProxy;
             }
-            HttpHandler.Proxy = proxy;*/
+            else
+            {
+                //IWebProxy proxy = new WebProxy();
+                //proxy = new WebProxy("127.0.0.1", 10809);
+                //HttpHandler.Proxy = proxy;
+                //HttpHandler.WindowsProxyUsePolicy = WindowsProxyUsePolicy.UseCustomProxy;
+
+                HttpHandler.WindowsProxyUsePolicy = WindowsProxyUsePolicy.UseWinInetProxy;
+            }
         }
         public void initHttpClient(WinHttpHandler handler = null) // due to only once allowed
         {
@@ -63,21 +73,9 @@ namespace TumblThree.Applications.Services
             HttpClient.BaseAddress = new Uri("https://www.tumblr.com/");
         }
 
-        public WinHttpHandler TakeHttpHandler
-        {
-            get
-            {
-                return HttpHandler;
-            }
-        }
-
-        public HttpClient TakeHttpClient
-        {
-            get
-            {
-                return this.HttpClient;
-            }
-        }
+        public WinHttpHandler TakeHttpHandler => HttpHandler;
+        public HttpClient TakeHttpClient => this.HttpClient;
+        public CookieContainer CookieContainer => this.TakeHttpHandler.CookieContainer;
 
         private HttpRequestMessage NewStubRequest(string url, string referer = "", Dictionary<string, string> headers = null)
         {
@@ -108,17 +106,17 @@ namespace TumblThree.Applications.Services
 
         public async Task<HttpResponseMessage> GetReqeust(string url, string referer = "", Dictionary<string, string> headers = null)
         {
-            // TODO: try catch
             var request = NewStubRequest(url, referer, headers);
             request.Method = HttpMethod.Get;
-            return await HttpClient.SendAsync(request);
+            return await HttpClient.SendAsync(request); // TODO: try catch
         }
 
         public HttpRequestMessage GetXhrReqeustMessage(string url, string referer = "", Dictionary<string, string> headers = null)
         {
             var request = NewStubRequest(url, referer, headers);
             request.Method = HttpMethod.Get;
-            request.Content = new StringContent(JsonConvert.SerializeObject(headers), System.Text.Encoding.UTF8, "application/json");
+            request.Content = new FormUrlEncodedContent(headers);
+            //request.Content = new StringContent(JsonConvert.SerializeObject(headers), System.Text.Encoding.UTF8, "application/json");
             request.Headers.TryAddWithoutValidation("X-Requested-With", "XMLHttpRequest");
             return request;
         }
@@ -134,7 +132,7 @@ namespace TumblThree.Applications.Services
         {
             var request = PostReqeustMessage(url, referer, headers);
             request.Headers.Add("Accept", "application/json, text/javascript, */*; q=0.01");
-            request.Headers.TryAddWithoutValidation("X-Requested-With", "XMLHttpRequest"); // NOT WORK?
+            request.Headers.TryAddWithoutValidation("X-Requested-With", "XMLHttpRequest");
             return request;
         }
 

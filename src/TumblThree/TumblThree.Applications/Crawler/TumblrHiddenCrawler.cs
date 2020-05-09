@@ -335,15 +335,17 @@ namespace TumblThree.Applications.Crawler
 
         protected virtual async Task<string> RequestDataAsync(string limit, string offset)
         {
-                string url = @"https://www.tumblr.com/svc/indash_blog?tumblelog_name_or_id=" + Blog.Name +
-                             @"&post_id=&limit=" + limit + "&offset=" + offset + "&should_bypass_safemode=true";
-                string referer = @"https://www.tumblr.com/dashboard/blog/" + Blog.Name;
-                var headers = new Dictionary<string, string> { { "X-tumblr-form-key", tumblrKey } };
-                HttpRequestMessage request = HttpRequestFactory.GetXhrReqeustMessage(url, referer, headers);
-                //CookieService.GetUriCookie(request.CookieContainer, new Uri("https://www.tumblr.com/"));
-                //CookieService.GetUriCookie(request.CookieContainer, new Uri("https://" + Blog.Name.Replace("+", "-") + ".tumblr.com"));
+            string url = @"https://www.tumblr.com/svc/indash_blog?tumblelog_name_or_id=" + Blog.Name +
+                         @"&post_id=&limit=" + limit + "&offset=" + offset + "&should_bypass_safemode=true";
+            string referer = @"https://www.tumblr.com/dashboard/blog/" + Blog.Name;
+            var headers = new Dictionary<string, string> { { "X-tumblr-form-key", tumblrKey } };
+            using (HttpRequestMessage request = HttpRequestFactory.GetXhrReqeustMessage(url, referer, headers))
+            {
+                //CookieService.FillUriCookie(new Uri("https://www.tumblr.com/"));
+                //CookieService.FillUriCookie(new Uri("https://" + Blog.Name.Replace("+", "-") + ".tumblr.com"));
                 var res = await HttpRequestFactory.SendAsync(request);
                 return await res.Content.ReadAsStringAsync();
+            }
         }
 
         private async Task AddUrlsToDownloadListAsync(TumblrJson response, int crawlerNumber)

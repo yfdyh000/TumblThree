@@ -12,25 +12,35 @@ namespace TumblThree.Applications.Services
     [Export]
     public class SharedCookieService : ISharedCookieService
     {
-        public void GetUriCookie(CookieContainer cookieContainer, CookieContainer request, Uri uri)
+        public CookieContainer CookieContainer { get; } = new CookieContainer();
+
+        public void FillUriCookie(Uri uri, CookieContainer container = null)
         {
-            foreach (Cookie cookie in cookieContainer.GetCookies(uri))
+            if (container == null) container = this.CookieContainer;
+            foreach (Cookie cookie in CookieContainer.GetCookies(uri))
             {
-                request.Add(cookie);
+                container.Add(cookie);
             }
         }
 
-        public void SetUriCookie(CookieContainer cookieContainer, IEnumerable cookies)
+        public void RefreshAllCookies(CookieContainer originCookies)
+        {
+            foreach (Cookie cookie in this.GetAllCookies(originCookies))
+            {
+                CookieContainer.Add(cookie);
+            }
+        }
+        public void SetUriCookie(IEnumerable cookies)
         {
             foreach (Cookie cookie in cookies)
             {
-                cookieContainer.Add(cookie);
+                CookieContainer.Add(cookie);
             }
         }
 
-        public void RemoveUriCookie(CookieContainer cookieContainer, Uri uri)
+        public void RemoveUriCookie(Uri uri)
         {
-            foreach (Cookie cookie in cookieContainer.GetCookies(uri))
+            foreach (Cookie cookie in this.CookieContainer.GetCookies(uri))
             {
                 cookie.Expired = true;
             }

@@ -119,6 +119,7 @@ namespace TumblThree.Applications.Controllers
             QueueController.Initialize();
             DetailsController.Initialize();
             CrawlerController.Initialize();
+            _cookieService.SetUriCookie(_cookieList);
         }
 
         public async void Run()
@@ -153,7 +154,7 @@ namespace TumblThree.Applications.Controllers
             SaveSettings(Path.Combine(savePath, AppSettingsFileName), _appSettings);
             SaveSettings(Path.Combine(savePath, QueueSettingsFileName), _queueSettings);
             SaveSettings(Path.Combine(savePath, ManagerSettingsFileName), _managerSettings);
-            SaveSettings(Path.Combine(savePath, CookiesFileName), new List<Cookie>(_cookieService.GetAllCookies(_httpRequestFactory.TakeHttpHandler.CookieContainer))); // ok???
+            SaveSettings(Path.Combine(savePath, CookiesFileName), new List<Cookie>(_cookieService.GetAllCookies(_cookieService.CookieContainer)));
         }
 
         private void OnSettingsUpdated(object sender, EventArgs e)
